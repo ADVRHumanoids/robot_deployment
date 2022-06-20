@@ -5,7 +5,7 @@ KVER=5.10
 KDIR=$HOME/linux-dovetail
 XENOVER=3.2.1
 XENODIR=$HOME/xenomai-dovetail
-SCRIPTDIR=$HOME/robot_deployment/xenomai
+SCRIPTDIR=$HOME/src/robot_deployment/xenomai
 
 # clone patched kernel
 cd $HOME
@@ -32,8 +32,15 @@ kernel() {
 # compile xenomai
 xeno() {
     cd $HOME
+
+    # install dependency
+    sudo apt install cmake autogen autoconf libtool
     # clone xenomai 3.2
     if [ ! -d xenomai-dovetail ]; then
+        # NOTE SSL hack for GIT
+	export GIT_SSL_NO_VERIFY=1
+	git config --global http.sslverify false
+
         git clone --branch v$XENOVER --depth 1 https://source.denx.de/Xenomai/xenomai.git $XENODIR
         cd $XENODIR
         ./scripts/bootstrap
@@ -41,7 +48,7 @@ xeno() {
     fi
 
     cd $XENODIR
-    ./configure --enable-pshared --enable-tls --enable-dlopen-libs --enable-async-cancel --enable-smp
+    ./configure --enable-pshared --enable-tls --enable-dlopen-libs --enable-async-cancel --enable-smp --disable-dependency-tracking
     make -j8
     sudo make install
     
@@ -60,6 +67,8 @@ xeno() {
     cd $SCRIPTDIR
     sudo groupadd -f xenomai
     sudo usermod -a -G xenomai $USER
+    # TODO: echo "<gid>" > /sys/module/xenomai/parameters/allowed_group
+
     echo /usr/xenomai/lib/ > xenomai.conf
     sudo cp -f xenomai.conf /etc/ld.so.conf.d/
     sudo ldconfig
@@ -75,6 +84,5 @@ xeno() {
     
 }
 
-xeno()
-
+xeno
 
