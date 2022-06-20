@@ -2,7 +2,7 @@
 
 ```
 mkdir ~/src
-git clone -b lm_devel https://github.com/ADVRHumanoids/robot_deployment.git
+git clone -b devel_lm https://github.com/ADVRHumanoids/robot_deployment.git
 
 cd ~/src/robot_deployment
 
